@@ -1,5 +1,6 @@
 package io.alex.todoproject.service;
 
+import io.alex.todoproject.exceptions.TodoNotFoundException;
 import io.alex.todoproject.models.Todo;
 import io.alex.todoproject.models.CreateTodoRequest;
 import io.alex.todoproject.models.TodoResponse;
@@ -10,9 +11,9 @@ import java.util.UUID;
 
 public interface TodoService {
 
-    Iterable<TodoResponse> getAll();
+    Iterable<Todo> getAll();
 
-    Optional<TodoResponse> getTodoById(UUID id);
+    Optional<Todo> getTodoById(UUID id);
 
     Todo create(CreateTodoRequest todo);
 
@@ -20,7 +21,7 @@ public interface TodoService {
 
     void deleteTodoById(UUID id);
 
-    Todo updateTodoById(UUID id, TodoUpdateRequest todo);
+    Todo updateByUUID(UUID id, TodoUpdateRequest todo) throws TodoNotFoundException;
 
     void deleteTodoByCompleted(boolean completed);
 

@@ -22,8 +22,6 @@ public class Todo {
     private String title;
     private boolean completed;
     private int rank;
-
-    @Column(name = "url", updatable = false)
     private String url;
 
     public Todo(String title, boolean completed, int rank, String url) {

@@ -19,7 +19,5 @@ public interface TodoRepository extends CrudRepository<Todo, UUID> {
 
     void deleteByUUID(UUID id);
 
-    Todo updateByUUID(UUID id, TodoUpdateRequest todo);
-
 //    void deleteTodoByUUID(UUID uuid);
 }

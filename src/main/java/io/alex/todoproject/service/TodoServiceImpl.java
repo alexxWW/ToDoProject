@@ -1,12 +1,15 @@
 package io.alex.todoproject.service;
 
+import io.alex.todoproject.exceptions.TodoNotFoundException;
 import io.alex.todoproject.models.Todo;
 import io.alex.todoproject.models.CreateTodoRequest;
 import io.alex.todoproject.models.TodoResponse;
 import io.alex.todoproject.models.TodoUpdateRequest;
 import io.alex.todoproject.todoRepository.TodoRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @Service
@@ -20,13 +23,13 @@ public class TodoServiceImpl implements TodoService {
 
 
     @Override
-    public Iterable<TodoResponse> getAll() {
-        return todoResponsesListRequest(todoCrudService.findAll());
+    public Iterable<Todo> getAll() {
+        return todoCrudService.findAll();
     }
 
     @Override
-    public Optional<TodoResponse> getTodoById(UUID id) {
-        return Optional.ofNullable(getTodoResponse(todoCrudService.findByUUID(id)));
+    public Optional<Todo> getTodoById(UUID id) {
+        return todoCrudService.findByUUID(id);
     }
 
     @Override
@@ -45,14 +48,14 @@ public class TodoServiceImpl implements TodoService {
     }
 
     @Override
-    public Todo updateTodoById(UUID id, TodoUpdateRequest todo) {
-        Optional<TodoResponse> todoToUpdate = this.getTodoById(id);
+    public Todo updateByUUID(UUID id, TodoUpdateRequest todo) throws TodoNotFoundException {
+        Optional<Todo> getTodo = getTodoById(id);
 
-        if(todoToUpdate.isEmpty()) {
-            return null;
+        if(getTodo.isEmpty()) {
+            throw new TodoNotFoundException();
         }
-        TodoUpdateRequest updatedTodo = TodoUpdateRequest.builder().title(todo.getTitle()).completed(todo.isCompleted()).rank(todo.getRank()).build();
-        return todoCrudService.updateByUUID(id, updatedTodo);
+        Todo updatedTodo = Todo.builder().id(id).title(todo.getTitle()).completed(todo.isCompleted()).rank(todo.getRank()).build();
+        return todoCrudService.save(updatedTodo);
     }
 
     @Override
@@ -61,25 +64,11 @@ public class TodoServiceImpl implements TodoService {
     }
 
     private Todo todoCreateRequest(CreateTodoRequest todo) {
+
         if(todo == null) {
             return null;
         }
-        return Todo.builder().title(todo.getTitle()).rank(1).completed(false).url("www.google.fr").build();
+        return Todo.builder().title(todo.getTitle()).rank(1).completed(false).build();
     }
 
-    private TodoResponse todoResponseRequest(Todo todo) {
-        return TodoResponse.builder().id(todo.getId()).title(todo.getTitle()).rank(todo.getRank()).completed(todo.isCompleted()).url(todo.getUrl()).build();
-    }
-    private Iterable<TodoResponse> todoResponsesListRequest(Iterable<Todo> todos) {
-        List<TodoResponse> todoResponses = new ArrayList<>();
-
-        for(Todo todo : todos) {
-            todoResponses.add(todoResponseRequest(todo));
-        }
-        return todoResponses;
-    }
-
-    private TodoResponse getTodoResponse(Optional<Todo> todo) {
-        return TodoResponse.builder().id(todo.get().getId()).title(todo.get().getTitle()).completed(todo.get().isCompleted()).rank(todo.get().getRank()).url(todo.get().getUrl()).build();
-    }
 }

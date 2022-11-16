@@ -1,26 +1,29 @@
-package io.alex.todoproject;
+package io.alex.todoproject.models;
 
 import com.sun.istack.NotNull;
-import org.springframework.data.annotation.PersistenceCreator;
+import lombok.Builder;
+import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "TODO")
+@Builder
 public class Todo {
 
     @Id
-    @GeneratedValue
     @NotNull
-    private String id;
+    @GeneratedValue(generator="uuid")
+    @GenericGenerator(name="uuid", strategy = "uuid")
+    private UUID id;
 
     private String title;
     private boolean completed;
     private int rank;
+
+    @Column(name = "url", updatable = false)
     private String url;
 
     public Todo(String title, boolean completed, int rank, String url) {
@@ -30,8 +33,7 @@ public class Todo {
         this.url = url;
     }
 
-    @PersistenceCreator
-    public Todo(String id, String title, boolean completed, int rank, String url) {
+    public Todo(UUID id, String title, boolean completed, int rank, String url) {
         this.id=id;
         this.title=title;
         this.completed=completed;
@@ -43,11 +45,11 @@ public class Todo {
 
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

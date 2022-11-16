@@ -1,22 +1,27 @@
 package io.alex.todoproject.service;
 
-import io.alex.todoproject.Todo;
+import io.alex.todoproject.models.Todo;
+import io.alex.todoproject.models.CreateTodoRequest;
+import io.alex.todoproject.models.TodoResponse;
+import io.alex.todoproject.models.TodoUpdateRequest;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public interface TodoService {
 
-    public Iterable<Todo> getAllTodo();
+    Iterable<TodoResponse> getAll();
 
-    public Optional<Todo> getTodoById(String id);
+    Optional<TodoResponse> getTodoById(UUID id);
 
-    Todo createTodo(Todo todo);
+    Todo create(CreateTodoRequest todo);
 
-    public void deleteAllTodo();
+    void deleteAllTodo();
 
-    public void deleteTodoById(String id);
+    void deleteTodoById(UUID id);
 
-    public Todo updateTodoById(String id);
+    Todo updateTodoById(UUID id, TodoUpdateRequest todo);
 
-    public Todo updateTodo(Todo todoToUpdate);
+    void deleteTodoByCompleted(boolean completed);
+
 }

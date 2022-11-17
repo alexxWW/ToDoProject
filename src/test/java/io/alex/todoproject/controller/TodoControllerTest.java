@@ -1,10 +1,9 @@
 package io.alex.todoproject.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.alex.todoproject.models.Todo;
-import io.alex.todoproject.models.CreateTodoRequest;
-import io.alex.todoproject.models.TodoResponse;
-import io.alex.todoproject.models.TodoUpdateRequest;
+import io.alex.todoproject.exceptions.TodoConflictException;
+import io.alex.todoproject.exceptions.TodoNotFoundException;
+import io.alex.todoproject.models.*;
 import io.alex.todoproject.service.TodoServiceImpl;
 import io.alex.todoproject.todoRepository.TodoRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -20,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static io.alex.todoproject.fakeObject.fakeTodoObjects.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -45,21 +45,18 @@ class TodoControllerTest {
     @Test
     @DisplayName("Should create a todo and return 201 created")
     void create() throws Exception {
-        UUID id = UUID.randomUUID();
-        Todo expectedTodo = new Todo(id, "title", false, 1, "http://localhost/todos/" + id);
-        CreateTodoRequest createTodo = CreateTodoRequest.builder().title("title").build();
         String URICreateTodo = "/todos";
 
-        when(todoService.create(any(CreateTodoRequest.class))).thenReturn(expectedTodo);
+        when(todoService.create(any())).thenReturn(todo);
 
         mockMvc.perform(post(URICreateTodo)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createTodo)))
+                        .content(objectMapper.writeValueAsString(createTodoRequest)))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(content().json(objectMapper.writeValueAsString(expectedTodo), true))
+                .andExpect(content().json(objectMapper.writeValueAsString(todo), true))
                 .andDo(print());
 
-        verify(todoService).create(any(CreateTodoRequest.class));
+        verify(todoService).create(any());
         verifyNoMoreInteractions(todoService);
     }
 
@@ -67,14 +64,13 @@ class TodoControllerTest {
     @DisplayName("Should return a list of Todo")
     void getAllTodos() throws Exception {
         String URIGetAll = ("/todos");
-        final List<Todo> todoResponses = List.of(Todo.builder().id(UUID.randomUUID()).title("cuisine").rank(1).completed(false).url("www.google.fr").build(), Todo.builder().id(UUID.randomUUID()).title("sale de bain").rank(2).completed(false).url("www.google.fr").build());
 
-        when(todoService.getAll()).thenReturn(todoResponses);
+        when(todoService.getAll()).thenReturn(todoList);
 
         mockMvc.perform(get(URIGetAll))
                 .andExpect(MockMvcResultMatchers.status()
                         .isOk())
-                .andExpect(content().json(objectMapper.writeValueAsString(todoResponses)))
+                .andExpect(content().json(objectMapper.writeValueAsString(todoList)))
                 .andDo(print());
         verify(todoService).getAll();
         verifyNoMoreInteractions(todoService);
@@ -112,36 +108,32 @@ class TodoControllerTest {
     @Test
     @DisplayName("Should delete todo by UUID")
     void deleteByUUID() throws Exception {
-        UUID id = UUID.randomUUID();
-        Todo expectedTodo = Todo.builder().id(id).title("title").completed(false).rank(1).url("www.google.fr").build();
 
-        when(todoService.getTodoById(expectedTodo.getId())).thenReturn(Optional.of(expectedTodo));
-        doNothing().when(todoService).deleteTodoById(expectedTodo.getId());
+        when(todoService.getTodoById(todo.getId())).thenReturn(Optional.of(todo));
+        doNothing().when(todoService).deleteTodoById(todo.getId());
 
-        mockMvc.perform(delete("/todos/{id}", expectedTodo.getId())
+        mockMvc.perform(delete("/todos/{id}", todo.getId())
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isNoContent())
                 .andDo(print());
 
-        verify(todoService).getTodoById(expectedTodo.getId());
-        verify(todoService).deleteTodoById(expectedTodo.getId());
+        verify(todoService).getTodoById(todo.getId());
+        verify(todoService).deleteTodoById(todo.getId());
         verifyNoMoreInteractions(todoService);
     }
 
     @Test
     @DisplayName("Should get a todo with the id")
     void canGetTodoById() throws Exception {
-        Todo expectedTodo = new Todo(UUID.randomUUID(), "title", false, 1, "www.google.fr");
-        Todo expectedTodoResponse = Todo.builder().id(expectedTodo.getId()).completed(true).rank(1).url("www.google.fr").build();
 
-        when(todoService.getTodoById(expectedTodo.getId())).thenReturn(Optional.of(expectedTodoResponse));
+        when(todoService.getTodoById(any())).thenReturn(Optional.of(todo));
 
-        mockMvc.perform(get("/todos/{id}", expectedTodo.getId())
+        mockMvc.perform(get("/todos/{id}", todo.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andDo(print());
 
-        verify(todoService, times(2)).getTodoById(expectedTodo.getId());
+        verify(todoService, times(2)).getTodoById(todo.getId());
         verifyNoMoreInteractions(todoService);
     }
 
@@ -161,66 +153,51 @@ class TodoControllerTest {
     @Test
     @DisplayName("Should update a Todo by id")
     void updateTodoById() throws Exception {
-        Todo getTodo = Todo.builder().id(UUID.randomUUID()).title("salon").completed(false).rank(1).url("www.google.fr").build();
-        TodoUpdateRequest todoUpdateRequest = TodoUpdateRequest.builder().title("chambre").completed(false).rank(2).build();
-        Todo todoUpdated = Todo.builder().id(getTodo.getId()).title(todoUpdateRequest.getTitle()).completed(todoUpdateRequest.isCompleted()).rank(todoUpdateRequest.getRank()).url(getTodo.getUrl()).build();
-        TodoResponse todoResponse = TodoResponse.builder().id(todoUpdated.getId()).title(todoUpdated.getTitle()).completed(todoUpdated.isCompleted()).rank(todoUpdated.getRank()).url(todoUpdated.getUrl()).build();
 
-        when(todoService.getAll()).thenReturn(List.of(getTodo));
-        when(todoService.updateByUUID(getTodo.getId(), todoUpdateRequest)).thenReturn(todoUpdated);
+        when(todoService.getAll()).thenReturn(List.of(todo));
+        when(todoService.updateByUUID(todo.getId(), todoUpdateRequest)).thenReturn(todo);
 
-        mockMvc.perform(put("/todos/{id}", getTodo.getId())
+        mockMvc.perform(put("/todos/{id}", todo.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(todoUpdateRequest)))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().json(objectMapper.writeValueAsString(todoResponse), true));
 
-        verify(todoService).getAll();
-        verify(todoService).updateByUUID(getTodo.getId(), todoUpdateRequest);
+        verify(todoService).updateByUUID(todo.getId(), todoUpdateRequest);
         verifyNoMoreInteractions(todoService);
     }
 
     @Test
     @DisplayName("Should return a 409 conflict error if existing todo with existing rank")
     void cantUpdateTodoAndReturn409() throws Exception {
-        Todo getTodo = Todo.builder().id(UUID.randomUUID()).title("salon").completed(false).rank(1).url("www.google.fr").build();
-        List<Todo> todoList = List.of(Todo.builder().id(UUID.randomUUID()).title("salon").completed(false).rank(2).url("www.google.fr").build(), Todo.builder().id(UUID.randomUUID()).title("salon").completed(false).rank(1).url("www.google.fr").build());
-        TodoUpdateRequest todoUpdateRequest = TodoUpdateRequest.builder().title("chambre").completed(false).rank(getTodo.getRank()).build();
-        Todo todoUpdated = Todo.builder().id(getTodo.getId()).title(todoUpdateRequest.getTitle()).completed(todoUpdateRequest.isCompleted()).rank(todoUpdateRequest.getRank()).url(getTodo.getUrl()).build();
-        TodoResponse todoResponse = TodoResponse.builder().id(todoUpdated.getId()).title(todoUpdated.getTitle()).completed(todoUpdated.isCompleted()).rank(todoUpdated.getRank()).url(todoUpdated.getUrl()).build();
 
-        when(todoService.getAll()).thenReturn(todoList);
-        when(todoService.getTodoById(getTodo.getId())).thenReturn(Optional.of(getTodo));
-        when(todoService.updateByUUID(any(), any())).thenReturn(todoUpdated);
+        doThrow(TodoConflictException.class).when(todoService).updateByUUID(todo.getId(), todoUpdateRequest);
 
-        mockMvc.perform(put("/todos/{id}", getTodo.getId())
+        mockMvc.perform(put("/todos/{id}", todo.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(todoUpdateRequest)))
                 .andExpect(status().isConflict())
                 .andDo(print());
 
-//        verify(todoService).getTodoById(todo.getId());
-//        verify(todoService).updateByUUID(todo.getId(), todoUpdateRequest);
-//        verifyNoInteractions(todoService);
+        verify(todoService).updateByUUID(todo.getId(), todoUpdateRequest);
+        verifyNoMoreInteractions(todoService);
     }
 
     @Test
     @DisplayName("Should return 404 not found if todo isn't exist")
     void cantUpdateTodoIfNotExist() throws Exception {
-        TodoUpdateRequest todoUpdateRequest = TodoUpdateRequest.builder().title("chambre").completed(true).rank(1).build();
-        Todo todo = Todo.builder().id(UUID.randomUUID()).title("chambre").completed(true).rank(1).build();
+        UUID id = UUID.randomUUID();
 
-        when(todoService.getTodoById(todo.getId())).thenReturn(Optional.empty());
+        doThrow(TodoNotFoundException.class).when(todoService).updateByUUID(id, todoUpdateRequest);
 
-        mockMvc.perform(put("/todos/{id}", UUID.randomUUID())
+        mockMvc.perform(put("/todos/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(todoUpdateRequest)))
                 .andExpect(status().isNotFound())
                 .andDo(print());
 
-//        verify(todoService).getTodoById(todo.getId());
-//        verify(todoService).updateByUUID(todo.getId(), todoUpdateRequest);
-//        verifyNoInteractions(todoService);
+        verify(todoService).updateByUUID(id, todoUpdateRequest);
+        verifyNoMoreInteractions(todoService);
     }
 }

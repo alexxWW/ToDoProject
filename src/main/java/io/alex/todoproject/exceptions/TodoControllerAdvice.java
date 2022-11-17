@@ -10,11 +10,13 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class TodoControllerAdvice extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(TodoNotFoundException.class)
+    @ExceptionHandler({TodoNotFoundException.class, TodoConflictException.class})
     public ResponseEntity<Object> handleExceptions(Exception ex, WebRequest request) throws Exception {
 
         if(ex instanceof TodoNotFoundException) {
             return handleTodoNotFoundException();
+        } else if(ex instanceof TodoConflictException) {
+            return handleTodoConflictException();
         }
         throw ex;
     }
@@ -23,4 +25,7 @@ public class TodoControllerAdvice extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
+    private ResponseEntity<Object> handleTodoConflictException() {
+        return ResponseEntity.status(HttpStatus.CONFLICT).build();
+    }
 }

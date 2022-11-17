@@ -1,15 +1,11 @@
 package io.alex.todoproject.service;
 
+import io.alex.todoproject.exceptions.TodoConflictException;
 import io.alex.todoproject.exceptions.TodoNotFoundException;
-import io.alex.todoproject.models.Todo;
-import io.alex.todoproject.models.CreateTodoRequest;
-import io.alex.todoproject.models.TodoResponse;
-import io.alex.todoproject.models.TodoUpdateRequest;
+import io.alex.todoproject.models.*;
 import io.alex.todoproject.todoRepository.TodoRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @Service
@@ -21,20 +17,22 @@ public class TodoServiceImpl implements TodoService {
          this.todoCrudService = todoCrudService;
     }
 
-
     @Override
-    public Iterable<Todo> getAll() {
-        return todoCrudService.findAll();
+    public List<Todo> getAll() {
+        return convertListTodoEntityToTodo(todoCrudService.findAll());
     }
 
     @Override
-    public Optional<Todo> getTodoById(UUID id) {
-        return todoCrudService.findByUUID(id);
+    public Optional<Todo> getTodoById(UUID id) throws TodoNotFoundException {
+
+        return convertTodoEntityToTodo(Optional.of(todoCrudService.findByUUID(id).orElseThrow(TodoNotFoundException::new)));
     }
 
     @Override
-    public Todo create(CreateTodoRequest todo) {
-        return todoCrudService.save(todoCreateRequest(todo));
+    public Todo create(String todo) {
+        int maxRank = todoCrudService.findTodoByMaxOrder();
+        TodoEntity todoToEntity = TodoEntity.builder().title(todo).rank(maxRank + 1).build();
+        return convertEntityToTodo(todoCrudService.save(todoToEntity));
     }
 
     @Override
@@ -48,14 +46,20 @@ public class TodoServiceImpl implements TodoService {
     }
 
     @Override
-    public Todo updateByUUID(UUID id, TodoUpdateRequest todo) throws TodoNotFoundException {
+    public Todo updateByUUID(UUID id, TodoUpdateRequest todo) throws TodoNotFoundException, TodoConflictException {
         Optional<Todo> getTodo = getTodoById(id);
+        List<Todo> allTodos = getAll();
 
         if(getTodo.isEmpty()) {
             throw new TodoNotFoundException();
         }
-        Todo updatedTodo = Todo.builder().id(id).title(todo.getTitle()).completed(todo.isCompleted()).rank(todo.getRank()).build();
-        return todoCrudService.save(updatedTodo);
+        for(Todo singleTodo : allTodos) {
+            if(singleTodo.getRank() == todo.getRank()) {
+                throw new TodoConflictException();
+            }
+        }
+        TodoEntity updatedTodo = TodoEntity.builder().id(id).title(todo.getTitle()).completed(todo.isCompleted()).rank(todo.getRank()).build();
+        return convertEntityToTodo(todoCrudService.save(updatedTodo));
     }
 
     @Override
@@ -63,12 +67,24 @@ public class TodoServiceImpl implements TodoService {
         todoCrudService.deleteTodoByCompleted(isCompleted);
     }
 
-    private Todo todoCreateRequest(CreateTodoRequest todo) {
+    private Todo convertTodoEntity(TodoEntity todo) {
+        return Todo.builder().id(todo.getId()).title(todo.getTitle()).completed(todo.isCompleted()).rank(todo.getRank()).url(todo.getUrl()).build();
+    }
 
-        if(todo == null) {
-            return null;
+    private List<Todo> convertListTodoEntityToTodo(List<TodoEntity> todo) {
+        List<Todo> todosList = new ArrayList<>();
+        for(TodoEntity eachTodo : todo) {
+            todosList.add(convertTodoEntity(eachTodo));
         }
-        return Todo.builder().title(todo.getTitle()).rank(1).completed(false).build();
+        return todosList;
+    }
+
+    private Optional<Todo> convertTodoEntityToTodo(Optional<TodoEntity> todo) {
+        return Optional.ofNullable(Todo.builder().id(todo.get().getId()).title(todo.get().getTitle()).completed(todo.get().isCompleted()).rank(todo.get().getRank()).url(todo.get().getUrl()).build());
+    }
+
+    private Todo convertEntityToTodo(TodoEntity todo) {
+        return Todo.builder().id(todo.getId()).title(todo.getTitle()).completed(todo.isCompleted()).rank(todo.getRank()).url(todo.getUrl()).build();
     }
 
 }

@@ -7,7 +7,6 @@ import java.util.UUID;
 
 @Builder
 public class TodoResponse {
-
     private UUID id;
     private String title;
     private boolean completed;

@@ -81,7 +81,7 @@ class TodoControllerTest {
     void deleteAllTodoIfNoQueryParameter() throws Exception {
         String URI = "/todos";
 
-        doNothing().when(todoService).deleteAllTodo();
+        doNothing().when(todoService).deleteTodoByCompleted(false);
 
         mockMvc.perform(delete(URI)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -89,20 +89,24 @@ class TodoControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isNoContent())
                 .andDo(print());
 
-        verify(todoService).deleteAllTodo();
+        verify(todoService).deleteTodoByCompleted(false);
         verifyNoMoreInteractions(todoService);
+        verifyNoMoreInteractions(todoRepository);
     }
 
     @Test
-    @DisplayName("Should delete todo depending on the query param completed")
-    void deleteAllTodoIfQueryParameter() throws Exception {
+    @DisplayName("Should delete todo depending on the query param completed to true")
+    void deleteAllTodoCompletedTrue() throws Exception {
 
-        doNothing().when(todoService).deleteTodoByCompleted(false);
+        doNothing().when(todoService).deleteTodoByCompleted(true);
 
-        mockMvc.perform(delete("/todos").param("completed", String.valueOf(false))
+        mockMvc.perform(delete("/todos").param("completed", String.valueOf(true))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isNoContent())
                 .andDo(print());
+
+        verify(todoService).deleteTodoByCompleted(true);
+        verifyNoMoreInteractions(todoService);
     }
 
     @Test

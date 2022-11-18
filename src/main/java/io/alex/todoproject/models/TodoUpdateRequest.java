@@ -9,12 +9,12 @@ public class TodoUpdateRequest {
 
     private String title;
     private boolean completed;
-    private int rank;
+    private int order;
 
-    public TodoUpdateRequest(String title, boolean completed, int rank) {
+    public TodoUpdateRequest(String title, boolean completed, int order) {
         this.title = title;
         this.completed = completed;
-        this.rank = rank;
+        this.order = order;
     }
 
     public TodoUpdateRequest() {
@@ -36,12 +36,12 @@ public class TodoUpdateRequest {
         this.completed = completed;
     }
 
-    public int getRank() {
-        return rank;
+    public int getOrder() {
+        return order;
     }
 
-    public void setRank(int rank) {
-        this.rank = rank;
+    public void setOrder(int rank) {
+        this.order = rank;
     }
 
     @Override
@@ -49,11 +49,11 @@ public class TodoUpdateRequest {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TodoUpdateRequest that = (TodoUpdateRequest) o;
-        return completed == that.completed && rank == that.rank && Objects.equals(title, that.title);
+        return completed == that.completed && order == that.order && Objects.equals(title, that.title);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(title, completed, rank);
+        return Objects.hash(title, completed, order);
     }
 }

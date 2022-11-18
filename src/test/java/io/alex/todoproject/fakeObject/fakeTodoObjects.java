@@ -15,7 +15,7 @@ public class fakeTodoObjects {
             .id(UUID.fromString("4811e9af-ce50-4a83-a6a4-ae316d38c536"))
             .title("title")
             .completed(false)
-            .rank(1)
+            .order(1)
             .url("http://localhost:8080/todos/4811e9af-ce50-4a83-a6a4-ae316d38c536")
             .build();
 
@@ -23,7 +23,7 @@ public class fakeTodoObjects {
             .id(UUID.fromString("4811e9af-ce50-4a83-a6a4-ae316d38c536"))
             .title("title")
             .completed(false)
-            .rank(1)
+            .order(1)
             .url("http://localhost:8080/todos/4811e9af-ce50-4a83-a6a4-ae316d38c536")
             .build();
 
@@ -31,27 +31,43 @@ public class fakeTodoObjects {
             .id(UUID.fromString("4811e9af-ce50-4a83-a6a4-ae316d38c536"))
             .title("title")
             .completed(false)
-            .rank(1)
+            .order(1)
             .url("http://localhost:8080/todos/4811e9af-ce50-4a83-a6a4-ae316d38c536")
             .build();
 
     public static final TodoUpdateRequest todoUpdateRequest = TodoUpdateRequest.builder()
             .title("title")
             .completed(false)
-            .rank(1)
+            .order(1)
             .build();
 
     public static final List<Todo> todoList = List.of(Todo.builder()
-            .id(UUID.randomUUID())
+            .id(UUID.fromString("4811e9af-ce50-4a83-a6a4-ae316d38c536"))
             .title("cuisine")
-            .rank(1)
+            .order(1)
             .completed(false)
             .url("www.google.fr")
             .build(),
             Todo.builder()
-                    .id(UUID.randomUUID())
+                    .id(UUID.fromString("4811e9af-ce50-4a83-a6a4-ae316d38c536"))
                     .title("sale de bain")
-                    .rank(2).completed(false)
+                    .order(2)
+                    .completed(false)
+                    .url("www.google.fr")
+                    .build());
+
+    public static final List<TodoEntity> todoEntityList = List.of(TodoEntity.builder()
+                    .id(UUID.fromString("4811e9af-ce50-4a83-a6a4-ae316d38c536"))
+                    .title("cuisine")
+                    .order(1)
+                    .completed(false)
+                    .url("www.google.fr")
+                    .build(),
+            TodoEntity.builder()
+                    .id(UUID.fromString("4811e9af-ce50-4a83-a6a4-ae316d38c536"))
+                    .title("sale de bain")
+                    .order(2)
+                    .completed(false)
                     .url("www.google.fr")
                     .build());
 
@@ -59,7 +75,7 @@ public class fakeTodoObjects {
             .id(UUID.fromString("4811e9af-ce50-4a83-a6a4-ae316d38c536"))
             .title("title")
             .completed(false)
-            .rank(1)
+            .order(1)
             .url("http://localhost:8080/todos/4811e9af-ce50-4a83-a6a4-ae316d38c536")
             .build();
 

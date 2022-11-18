@@ -37,7 +37,7 @@ public class TodoController {
 //        String uri = uriBuilder.pathSegment("todos", "{id}").buildAndExpand(todo.getId()).toUriString();
         String uri = UriComponentsBuilder.newInstance().scheme("http").host("localhost").port(8080).pathSegment("todos", "{id}").buildAndExpand(todo.getId()).toUriString();
 
-        return TodoResponse.builder().id(todo.getId()).title(todo.getTitle()).completed(todo.isCompleted()).rank(todo.getRank()).url(String.valueOf(uri)).build();
+        return TodoResponse.builder().id(todo.getId()).title(todo.getTitle()).completed(todo.isCompleted()).order(todo.getOrder()).url(String.valueOf(uri)).build();
     }
 
     @GetMapping
@@ -57,18 +57,15 @@ public class TodoController {
     }
 
     private Optional<TodoResponse> convertTodoToResponse(Optional<Todo> todo) {
-        return Optional.ofNullable(TodoResponse.builder().id(todo.get().getId()).title(todo.get().getTitle()).completed(todo.get().isCompleted()).rank(todo.get().getRank()).url(todo.get().getUrl()).build());
+        return Optional.ofNullable(TodoResponse.builder().id(todo.get().getId()).title(todo.get().getTitle()).completed(todo.get().isCompleted()).order(todo.get().getOrder()).url(todo.get().getUrl()).build());
     }
 
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<Void> deleteTodoByCompleted(@RequestParam(value = "completed", required = false) boolean isCompleted) {
-        if (isCompleted) {
-            todoService.deleteTodoByCompleted(isCompleted);
-        } else {
-            todoService.deleteAllTodo();
-        }
+    public ResponseEntity<Void> deleteTodoByCompleted(@RequestParam(value = "completed", required = false, defaultValue = "false") boolean isCompleted) {
+        todoService.deleteTodoByCompleted(isCompleted);
         return ResponseEntity.noContent().build();
+
     }
 
     @PutMapping(value = "{id}")
@@ -78,7 +75,7 @@ public class TodoController {
         return ResponseEntity.ok(convertTodoToResponse(todoService.updateByUUID(id, todo)));
     }
 
-    @DeleteMapping(value = "/{id}")
+    @DeleteMapping(value = "{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> deleteByUUID(@PathVariable UUID id) throws TodoNotFoundException {
         Optional<Todo> getTodo = todoService.getTodoById(id);
@@ -90,7 +87,7 @@ public class TodoController {
     }
 
     private TodoResponse convertTodoToResponse(Todo todo) {
-        return TodoResponse.builder().id(todo.getId()).title(todo.getTitle()).completed(todo.isCompleted()).rank(todo.getRank()).url(todo.getUrl()).build();
+        return TodoResponse.builder().id(todo.getId()).title(todo.getTitle()).completed(todo.isCompleted()).order(todo.getOrder()).url(todo.getUrl()).build();
     }
 
     private List<TodoResponse> convertListTodoToResponse(Iterable<Todo> todo) {

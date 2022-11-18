@@ -24,27 +24,29 @@ public class TodoEntity {
     @NotBlank
     private String title;
     private boolean completed;
-    private int rank;
+
+    @Column(name = "rank")
+    private int order;
     private String url;
 
-    public TodoEntity(String title, boolean completed, int rank, String url) {
+    public TodoEntity(String title, boolean completed, int order, String url) {
         this.title = title;
         this.completed = completed;
-        this.rank = rank;
+        this.order = order;
         this.url = url;
     }
 
-    public TodoEntity(UUID id, String title, boolean completed, int rank, String url) {
+    public TodoEntity(UUID id, String title, boolean completed, int order, String url) {
         this.id=id;
         this.title=title;
         this.completed=completed;
-        this.rank=rank;
+        this.order=order;
         this.url=url;
     }
 
-    public TodoEntity(String title, int rank) {
+    public TodoEntity(String title, int order) {
         this.title = title;
-        this.rank = rank;
+        this.order = order;
     }
 
     public TodoEntity() {
@@ -75,12 +77,12 @@ public class TodoEntity {
         this.completed = completed;
     }
 
-    public int getRank() {
-        return rank;
+    public int getOrder() {
+        return order;
     }
 
     public void setRank(int rank) {
-        this.rank = rank;
+        this.order = rank;
     }
 
     public String getUrl() {
@@ -96,12 +98,12 @@ public class TodoEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TodoEntity todo = (TodoEntity) o;
-        return isCompleted() == todo.isCompleted() && getRank() == todo.getRank() && Objects.equals(getId(), todo.getId()) && Objects.equals(getTitle(), todo.getTitle()) && Objects.equals(getUrl(), todo.getUrl());
+        return isCompleted() == todo.isCompleted() && getOrder() == todo.getOrder() && Objects.equals(getId(), todo.getId()) && Objects.equals(getTitle(), todo.getTitle()) && Objects.equals(getUrl(), todo.getUrl());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getTitle(), isCompleted(), getRank(), getUrl());
+        return Objects.hash(getId(), getTitle(), isCompleted(), getOrder(), getUrl());
     }
 
 }

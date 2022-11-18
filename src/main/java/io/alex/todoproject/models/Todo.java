@@ -11,7 +11,7 @@ public class Todo {
     private UUID id;
     private String title;
     private boolean completed;
-    private int rank;
+    private int order;
     private String url;
 
     public UUID getId() {
@@ -38,12 +38,12 @@ public class Todo {
         this.completed = completed;
     }
 
-    public int getRank() {
-        return rank;
+    public int getOrder() {
+        return order;
     }
 
-    public void setRank(int rank) {
-        this.rank = rank;
+    public void setOrder(int rank) {
+        this.order = rank;
     }
 
     public String getUrl() {
@@ -59,11 +59,11 @@ public class Todo {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Todo todo = (Todo) o;
-        return completed == todo.completed && rank == todo.rank && Objects.equals(id, todo.id) && Objects.equals(title, todo.title) && Objects.equals(url, todo.url);
+        return completed == todo.completed && order == todo.order && Objects.equals(id, todo.id) && Objects.equals(title, todo.title) && Objects.equals(url, todo.url);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, completed, rank, url);
+        return Objects.hash(id, title, completed, order, url);
     }
 }

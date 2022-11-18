@@ -10,14 +10,14 @@ public class TodoResponse {
     private UUID id;
     private String title;
     private boolean completed;
-    private int rank;
+    private int order;
     private String url;
 
-    public TodoResponse(UUID id, String title, Boolean completed, int rank, String url) {
+    public TodoResponse(UUID id, String title, Boolean completed, int order, String url) {
         this.id = id;
         this.title = title;
         this.completed = completed;
-        this.rank = rank;
+        this.order = order;
         this.url = url;
     }
 
@@ -48,12 +48,12 @@ public class TodoResponse {
         this.completed = completed;
     }
 
-    public int getRank() {
-        return rank;
+    public int getOrder() {
+        return order;
     }
 
-    public void setRank(int rank) {
-        this.rank = rank;
+    public void setOrder(int rank) {
+        this.order = order;
     }
 
     public String getUrl() {
@@ -70,11 +70,11 @@ public class TodoResponse {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TodoResponse that = (TodoResponse) o;
-        return rank == that.rank && Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(completed, that.completed) && Objects.equals(url, that.url);
+        return order == that.order && Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(completed, that.completed) && Objects.equals(url, that.url);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, completed, rank, url);
+        return Objects.hash(id, title, completed, order, url);
     }
 }

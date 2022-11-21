@@ -9,9 +9,9 @@ public class TodoUpdateRequest {
 
     private String title;
     private boolean completed;
-    private int order;
+    private Integer order;
 
-    public TodoUpdateRequest(String title, boolean completed, int order) {
+    public TodoUpdateRequest(String title, boolean completed, Integer order) {
         this.title = title;
         this.completed = completed;
         this.order = order;
@@ -36,12 +36,12 @@ public class TodoUpdateRequest {
         this.completed = completed;
     }
 
-    public int getOrder() {
+    public Integer getOrder() {
         return order;
     }
 
-    public void setOrder(int rank) {
-        this.order = rank;
+    public void setOrder(Integer order) {
+        this.order = order;
     }
 
     @Override

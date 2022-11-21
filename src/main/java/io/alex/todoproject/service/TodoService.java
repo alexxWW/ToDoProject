@@ -17,15 +17,15 @@ public interface TodoService {
 
     List<Todo> getAll();
 
-    Optional<Todo> getTodoById(UUID id) throws TodoNotFoundException;
+    Optional<Todo> getTodoById(String id) throws TodoNotFoundException;
 
     Todo create(String todo);
 
     void deleteAllTodo();
 
-    void deleteTodoById(UUID id);
+    void deleteTodoById(String id);
 
-    Todo updateByUUID(UUID id, TodoUpdateRequest todo) throws TodoNotFoundException, TodoConflictException;
+    Todo updateById(String id, TodoUpdateRequest todo) throws TodoNotFoundException, TodoConflictException;
 
     void deleteTodoByCompleted(boolean completed);
 

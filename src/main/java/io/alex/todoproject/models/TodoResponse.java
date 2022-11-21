@@ -7,13 +7,13 @@ import java.util.UUID;
 
 @Builder
 public class TodoResponse {
-    private UUID id;
+    private String id;
     private String title;
     private boolean completed;
-    private int order;
+    private Integer order;
     private String url;
 
-    public TodoResponse(UUID id, String title, Boolean completed, int order, String url) {
+    public TodoResponse(String id, String title, Boolean completed, Integer order, String url) {
         this.id = id;
         this.title = title;
         this.completed = completed;
@@ -24,11 +24,11 @@ public class TodoResponse {
     public TodoResponse() {
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -48,11 +48,11 @@ public class TodoResponse {
         this.completed = completed;
     }
 
-    public int getOrder() {
+    public Integer getOrder() {
         return order;
     }
 
-    public void setOrder(int rank) {
+    public void setOrder(Integer order) {
         this.order = order;
     }
 

@@ -9,8 +9,7 @@ import javax.validation.constraints.NotBlank;
 import java.util.Objects;
 import java.util.UUID;
 
-@Entity
-@Table(name = "TODO")
+@Entity(name = "TODO")
 @Builder
 public class TodoEntity {
 
@@ -18,7 +17,7 @@ public class TodoEntity {
     @NotNull
     @GeneratedValue(generator="uuid")
     @GenericGenerator(name="uuid", strategy = "uuid")
-    private UUID id = UUID.randomUUID();
+    private String id;
 
     @NotNull
     @NotBlank
@@ -26,17 +25,17 @@ public class TodoEntity {
     private boolean completed;
 
     @Column(name = "rank")
-    private int order;
+    private Integer order;
     private String url;
 
-    public TodoEntity(String title, boolean completed, int order, String url) {
+    public TodoEntity(String title, boolean completed, Integer order, String url) {
         this.title = title;
         this.completed = completed;
         this.order = order;
         this.url = url;
     }
 
-    public TodoEntity(UUID id, String title, boolean completed, int order, String url) {
+    public TodoEntity(String id, String title, boolean completed, Integer order, String url) {
         this.id=id;
         this.title=title;
         this.completed=completed;
@@ -44,7 +43,7 @@ public class TodoEntity {
         this.url=url;
     }
 
-    public TodoEntity(String title, int order) {
+    public TodoEntity(String title, Integer order) {
         this.title = title;
         this.order = order;
     }
@@ -53,11 +52,11 @@ public class TodoEntity {
 
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -77,12 +76,12 @@ public class TodoEntity {
         this.completed = completed;
     }
 
-    public int getOrder() {
+    public Integer getOrder() {
         return order;
     }
 
-    public void setRank(int rank) {
-        this.order = rank;
+    public void setOrder(int order) {
+        this.order = order;
     }
 
     public String getUrl() {

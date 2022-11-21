@@ -34,21 +34,19 @@ public class TodoController {
     }
 
     private TodoResponse convertRequestTodoTodoResponse(Todo todo, UriComponentsBuilder uriBuilder) {
-//        String uri = uriBuilder.pathSegment("todos", "{id}").buildAndExpand(todo.getId()).toUriString();
         String uri = UriComponentsBuilder.newInstance().scheme("http").host("localhost").port(8080).pathSegment("todos", "{id}").buildAndExpand(todo.getId()).toUriString();
-
-        return TodoResponse.builder().id(todo.getId()).title(todo.getTitle()).completed(todo.isCompleted()).order(todo.getOrder()).url(String.valueOf(uri)).build();
+        return TodoResponse.builder().id(todo.getId()).title(todo.getTitle()).completed(todo.isCompleted()).order(todo.getOrder()).url(uri).build();
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<TodoResponse>> getAllTodos() {
-        return ResponseEntity.ok(convertListTodoToResponse(todoService.getAll()));
+    public ResponseEntity<List<TodoResponse>> getAllTodos(UriComponentsBuilder uriBuilder) {
+        return ResponseEntity.ok(convertListTodoToResponse(todoService.getAll(), uriBuilder));
     }
 
     @GetMapping(value = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Optional<TodoResponse>> getTodoById(@PathVariable UUID id) throws TodoNotFoundException {
+    public ResponseEntity<Optional<TodoResponse>> getTodoById(@PathVariable String id) throws TodoNotFoundException {
         Optional<Todo> getTodo = todoService.getTodoById(id);
         if(getTodo.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -70,14 +68,14 @@ public class TodoController {
 
     @PutMapping(value = "{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<TodoResponse> updateTodoById(@PathVariable UUID id, @Valid @RequestBody TodoUpdateRequest todo) throws TodoNotFoundException, TodoConflictException {
+    public ResponseEntity<TodoResponse> updateTodoById(@PathVariable String id, @Valid @RequestBody TodoUpdateRequest todo, UriComponentsBuilder uriBuilder) throws TodoNotFoundException, TodoConflictException {
 
-        return ResponseEntity.ok(convertTodoToResponse(todoService.updateByUUID(id, todo)));
+        return ResponseEntity.ok(convertRequestTodoTodoResponse(todoService.updateById(id, todo), uriBuilder));
     }
 
     @DeleteMapping(value = "{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<Void> deleteByUUID(@PathVariable UUID id) throws TodoNotFoundException {
+    public ResponseEntity<Void> deleteByUUID(@PathVariable String id) throws TodoNotFoundException {
         Optional<Todo> getTodo = todoService.getTodoById(id);
         if(getTodo.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -86,14 +84,10 @@ public class TodoController {
         return ResponseEntity.noContent().build();
     }
 
-    private TodoResponse convertTodoToResponse(Todo todo) {
-        return TodoResponse.builder().id(todo.getId()).title(todo.getTitle()).completed(todo.isCompleted()).order(todo.getOrder()).url(todo.getUrl()).build();
-    }
-
-    private List<TodoResponse> convertListTodoToResponse(Iterable<Todo> todo) {
+    private List<TodoResponse> convertListTodoToResponse(List<Todo> todo, UriComponentsBuilder uriBuilder) {
         List<TodoResponse> todosList = new ArrayList<>();
         for(Todo eachTodo : todo) {
-            todosList.add(convertTodoToResponse(eachTodo));
+            todosList.add(convertRequestTodoTodoResponse(eachTodo, uriBuilder));
         }
         return todosList;
     }

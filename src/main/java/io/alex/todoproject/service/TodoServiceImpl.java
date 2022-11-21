@@ -23,15 +23,23 @@ public class TodoServiceImpl implements TodoService {
     }
 
     @Override
-    public Optional<Todo> getTodoById(UUID id) throws TodoNotFoundException {
+    public Optional<Todo> getTodoById(String id) throws TodoNotFoundException {
 
-        return convertTodoEntityToTodo(Optional.of(todoCrudService.findByUUID(id).orElseThrow(TodoNotFoundException::new)));
+        return convertTodoEntityToTodo(Optional.of(todoCrudService.findById(id).orElseThrow(TodoNotFoundException::new)));
     }
 
     @Override
     public Todo create(String todo) {
-        TodoEntity todoToEntity = TodoEntity.builder().title(todo).order((1)).build();
-        return convertEntityToTodo(todoCrudService.save(todoToEntity));
+
+        if(todoCrudService.findAll().isEmpty()) {
+            return convertEntityToTodo(todoCrudService.save(TodoEntity.builder().title(todo).order(1).build()));
+
+        } else {
+            int giveOrder = todoCrudService.findTopByOrderByOrderDesc().getOrder();
+
+            return convertEntityToTodo(todoCrudService.save(TodoEntity.builder().title(todo).order(giveOrder + 1).build()));
+
+        }
     }
 
     @Override
@@ -40,12 +48,12 @@ public class TodoServiceImpl implements TodoService {
     }
 
     @Override
-    public void deleteTodoById(UUID id) {
-        todoCrudService.deleteByUUID(id);
+    public void deleteTodoById(String id) {
+        todoCrudService.deleteById(id);
     }
 
     @Override
-    public Todo updateByUUID(UUID id, TodoUpdateRequest todo) throws TodoNotFoundException, TodoConflictException {
+    public Todo updateById(String id, TodoUpdateRequest todo) throws TodoNotFoundException, TodoConflictException {
         Optional<Todo> getTodo = getTodoById(id);
         List<Todo> allTodos = getAll();
 
@@ -86,8 +94,7 @@ public class TodoServiceImpl implements TodoService {
     }
 
     private Todo convertEntityToTodo(TodoEntity todo) {
-        int maxOrder = todoCrudService.findTodoByMaxOrder();
-        return Todo.builder().id(todo.getId()).title(todo.getTitle()).completed(todo.isCompleted()).order(maxOrder + 1).url(todo.getUrl()).build();
+        return Todo.builder().id(todo.getId()).title(todo.getTitle()).completed(todo.isCompleted()).order(todo.getOrder()).url(todo.getUrl()).build();
     }
 
 }

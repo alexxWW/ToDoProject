@@ -1,10 +1,10 @@
 package io.alex.todoproject.todoRepository;
 
+import io.alex.todoproject.models.Todo;
 import io.alex.todoproject.models.TodoEntity;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -14,15 +14,16 @@ import java.util.UUID;
 @Transactional
 public interface TodoRepository extends CrudRepository<TodoEntity, UUID> {
 
-    @Query("select * FROM TODO where rank=true")
+    @Modifying
+    @Query("delete FROM TODO t where t.completed=true")
     void deleteTodoByCompletedTrue();
 
-    Optional<TodoEntity> findByUUID(UUID id);
+    Optional<TodoEntity> findById(String id);
 
-    void deleteByUUID(UUID id);
+    void deleteById(String id);
 
     List<TodoEntity> findAll();
 
-    int findTodoByMaxOrder();
+    TodoEntity findTopByOrderByOrderDesc();
 
 }

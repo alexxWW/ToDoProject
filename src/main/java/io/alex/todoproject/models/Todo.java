@@ -3,22 +3,21 @@ package io.alex.todoproject.models;
 import lombok.Builder;
 
 import java.util.Objects;
-import java.util.UUID;
 
 @Builder
 public class Todo {
 
-    private UUID id;
+    private String id;
     private String title;
     private boolean completed;
-    private int order;
+    private Integer order;
     private String url;
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -38,11 +37,11 @@ public class Todo {
         this.completed = completed;
     }
 
-    public int getOrder() {
+    public Integer getOrder() {
         return order;
     }
 
-    public void setOrder(int rank) {
+    public void setOrder(Integer rank) {
         this.order = rank;
     }
 

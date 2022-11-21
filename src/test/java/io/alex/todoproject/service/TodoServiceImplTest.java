@@ -36,6 +36,7 @@ public class TodoServiceImplTest {
     @DisplayName("Should create a new todo with his title")
     void createTodo() {
 
+        when(todoRepository.findAll()).thenReturn(List.of());
         when(todoRepository.save(any(TodoEntity.class))).thenReturn(todoEntity);
         String title = "title";
 
@@ -52,38 +53,38 @@ public class TodoServiceImplTest {
 
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
         verify(todoRepository, times(1)).save(any(TodoEntity.class));
-        verify(todoRepository, times(1)).findTodoByMaxOrder();
+        verify(todoRepository).findAll();
         verifyNoMoreInteractions(todoRepository);
     }
 
     @Test
     @DisplayName("Should create a new todo with a non existing rank")
     void createTodoWithNonExistingRank() {
-
-        when(todoRepository.save(any(TodoEntity.class))).thenReturn(todoEntity);
-        when(todoRepository.findTodoByMaxOrder()).thenReturn(2);
         String title = "title";
+        when(todoRepository.save(any(TodoEntity.class))).thenReturn(todoEntity);
+        when(todoRepository.findAll()).thenReturn(List.of(todoEntity));
+        when(todoRepository.findTopByOrderByOrderDesc()).thenReturn(todoEntity);
 
         Todo actual = todoService.create(title);
-
         Todo expected = Todo.builder()
-                .id(todoEntity.getId())
-                .title("title")
-                .completed(false)
-                .url(todoEntity.getUrl())
-                .order(3)
+                .id(actual.getId())
+                .title(actual.getTitle())
+                .completed(actual.isCompleted())
+                .url(actual.getUrl())
+                .order(actual.getOrder())
                 .build();
 
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
         verify(todoRepository, times(1)).save(any(TodoEntity.class));
-        verify(todoRepository, times(1)).findTodoByMaxOrder();
+        verify(todoRepository, times(1)).findTopByOrderByOrderDesc();
+        verify(todoRepository).findAll();
         verifyNoMoreInteractions(todoRepository);
     }
 
     @Test
     @DisplayName("Should get todo by id")
     void getById() throws TodoNotFoundException {
-        when(todoRepository.findByUUID(todoEntity.getId())).thenReturn(Optional.of(todoEntity));
+        when(todoRepository.findById(todoEntity.getId())).thenReturn(Optional.of(todoEntity));
 
         todoService.getTodoById(todo.getId());
         Todo expectedTodo = Todo.builder()
@@ -95,7 +96,7 @@ public class TodoServiceImplTest {
                 .build();
 
         assertThat(todo).usingRecursiveComparison().isEqualTo(expectedTodo);
-        verify(todoRepository, times(1)).findByUUID(todoEntity.getId());
+        verify(todoRepository, times(1)).findById(todoEntity.getId());
         verifyNoMoreInteractions(todoRepository);
     }
 
@@ -109,13 +110,13 @@ public class TodoServiceImplTest {
                         .title("cuisine")
                         .order(1)
                         .completed(false)
-                        .url("www.google.fr")
+                        .url("http://localhost:8080/todos/4811e9af-ce50-4a83-a6a4-ae316d38c536")
                         .build(),
                 Todo.builder()
                         .id(todoList.get(0).getId())
                         .title("sale de bain")
                         .order(2).completed(false)
-                        .url("www.google.fr")
+                        .url("http://localhost:8080/todos/4811e9af-ce50-4a83-a6a4-ae316d38c536")
                         .build());
         assertThat(todoList).usingRecursiveComparison().isEqualTo(expectedTodosList);
         verify(todoRepository).findAll();
@@ -126,10 +127,10 @@ public class TodoServiceImplTest {
     @DisplayName("Should can't find todo")
     void cantGetById() {
 
-        when(todoRepository.findByUUID(todoEntity.getId())).thenReturn(Optional.empty());
+        when(todoRepository.findById(todoEntity.getId())).thenReturn(Optional.empty());
 
         assertThrows(TodoNotFoundException.class, () -> todoService.getTodoById(todo.getId()));
-        verify(todoRepository, times(1)).findByUUID(todoEntity.getId());
+        verify(todoRepository, times(1)).findById(todoEntity.getId());
         verifyNoMoreInteractions(todoRepository);
     }
 
@@ -137,10 +138,10 @@ public class TodoServiceImplTest {
     @DisplayName("Should delete todo by id")
     void deleteById() {
 
-        doNothing().when(todoRepository).deleteByUUID(todoList.get(0).getId());
+        doNothing().when(todoRepository).deleteById(todoList.get(0).getId());
         todoService.deleteTodoById(todoList.get(0).getId());
 
-        verify(todoRepository, times(1)).deleteByUUID(eq(todoList.get(0).getId()));
+        verify(todoRepository, times(1)).deleteById(eq(todoList.get(0).getId()));
         verifyNoMoreInteractions(todoRepository);
     }
 
@@ -160,6 +161,7 @@ public class TodoServiceImplTest {
     @Test
     @DisplayName("Should update todo")
     void updateTodo() throws TodoConflictException, TodoNotFoundException {
+
         Todo todoExpected = Todo.builder()
                 .id(todoEntity.getId())
                 .title("title")
@@ -175,30 +177,29 @@ public class TodoServiceImplTest {
                 .order(todoEntity.getOrder())
                 .build();
 
-        when(todoRepository.findByUUID(todo.getId())).thenReturn(Optional.of(todoEntity));
+        when(todoRepository.findById(todo.getId())).thenReturn(Optional.of(todoEntity));
         when(todoRepository.save(todoEntityToSave)).thenReturn(todoEntity);
 
         todoService.getTodoById(todo.getId());
-        todoService.updateByUUID(todoEntityToSave.getId(), todoUpdateRequest);
+        todoService.updateById(todoEntityToSave.getId(), todoUpdateRequest);
 
         assertThat(todoEntity).usingRecursiveComparison().isEqualTo(todoExpected);
 
-        verify(todoRepository, times(2)).findByUUID(todo.getId());
+        verify(todoRepository, times(2)).findById(todo.getId());
         verify(todoRepository).save(todoEntityToSave);
         verify(todoRepository).findAll();
-        verify(todoRepository).findTodoByMaxOrder();
         verifyNoMoreInteractions(todoRepository);
     }
 
     @Test
     @DisplayName("Should can't update todo because of not found")
     void cantUpdate() {
-        UUID uuid = UUID.randomUUID();
+        String uuid = String.valueOf(UUID.randomUUID());
 
-        when(todoRepository.findByUUID(uuid)).thenReturn(Optional.empty());
+        when(todoRepository.findById(uuid)).thenReturn(Optional.empty());
 
-        assertThrows(TodoNotFoundException.class, () -> todoService.updateByUUID(uuid, todoUpdateRequest));
-        verify(todoRepository).findByUUID(uuid);
+        assertThrows(TodoNotFoundException.class, () -> todoService.updateById(uuid, todoUpdateRequest));
+        verify(todoRepository).findById(uuid);
         verifyNoMoreInteractions(todoRepository);
     }
 

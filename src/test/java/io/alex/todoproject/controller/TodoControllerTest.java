@@ -159,7 +159,7 @@ class TodoControllerTest {
     void updateTodoById() throws Exception {
 
         when(todoService.getAll()).thenReturn(List.of(todo));
-        when(todoService.updateByUUID(todo.getId(), todoUpdateRequest)).thenReturn(todo);
+        when(todoService.updateById(todo.getId(), todoUpdateRequest)).thenReturn(todo);
 
         mockMvc.perform(put("/todos/{id}", todo.getId())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -168,7 +168,7 @@ class TodoControllerTest {
                 .andDo(print())
                 .andExpect(content().json(objectMapper.writeValueAsString(todoResponse), true));
 
-        verify(todoService).updateByUUID(todo.getId(), todoUpdateRequest);
+        verify(todoService).updateById(todo.getId(), todoUpdateRequest);
         verifyNoMoreInteractions(todoService);
     }
 
@@ -176,7 +176,7 @@ class TodoControllerTest {
     @DisplayName("Should return a 409 conflict error if existing todo with existing rank")
     void cantUpdateTodoAndReturn409() throws Exception {
 
-        doThrow(TodoConflictException.class).when(todoService).updateByUUID(todo.getId(), todoUpdateRequest);
+        doThrow(TodoConflictException.class).when(todoService).updateById(todo.getId(), todoUpdateRequest);
 
         mockMvc.perform(put("/todos/{id}", todo.getId())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -184,16 +184,16 @@ class TodoControllerTest {
                 .andExpect(status().isConflict())
                 .andDo(print());
 
-        verify(todoService).updateByUUID(todo.getId(), todoUpdateRequest);
+        verify(todoService).updateById(todo.getId(), todoUpdateRequest);
         verifyNoMoreInteractions(todoService);
     }
 
     @Test
     @DisplayName("Should return 404 not found if todo isn't exist")
     void cantUpdateTodoIfNotExist() throws Exception {
-        UUID id = UUID.randomUUID();
+        String id = String.valueOf(UUID.randomUUID());
 
-        doThrow(TodoNotFoundException.class).when(todoService).updateByUUID(id, todoUpdateRequest);
+        doThrow(TodoNotFoundException.class).when(todoService).updateById(id, todoUpdateRequest);
 
         mockMvc.perform(put("/todos/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -201,7 +201,7 @@ class TodoControllerTest {
                 .andExpect(status().isNotFound())
                 .andDo(print());
 
-        verify(todoService).updateByUUID(id, todoUpdateRequest);
+        verify(todoService).updateById(id, todoUpdateRequest);
         verifyNoMoreInteractions(todoService);
     }
 }
